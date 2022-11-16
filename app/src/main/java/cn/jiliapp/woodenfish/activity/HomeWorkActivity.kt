@@ -51,6 +51,7 @@ class HomeWorkActivity : ExtendAppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding = ActivityHomeWorkBinding.inflate(layoutInflater);
         setContentView(binding.root);
+        toggleFullScreen();
         initSetting(binding);
         initOnClick(binding);
     }
