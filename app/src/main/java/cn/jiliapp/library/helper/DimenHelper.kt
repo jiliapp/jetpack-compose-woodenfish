@@ -3,11 +3,11 @@ import android.content.Context
 
  class DimenHelper {
      companion object {
-         public fun dp2px(context: Context, value: Float): Float {
+          fun dp2px(context: Context, value: Float): Float {
              return (context.resources.displayMetrics.density * value + 0.5f).toFloat()
-         }
+          }
 
-         public fun getStatusBarHeight(context: Context): Float {
+          fun getStatusBarHeight(context: Context): Float {
              val resources = context.resources
              val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
              return if (resourceId > 0) {
