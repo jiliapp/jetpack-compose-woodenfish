@@ -1,21 +1,26 @@
 package cn.jiliapp.woodenfish.activity
 
 import android.animation.Animator
-import android.os.Bundle
-import cn.jiliapp.woodenfish.R
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
+import android.os.Bundle
 import android.util.SparseArray
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
+import androidx.lifecycle.Observer
 import cn.jiliapp.library.activity.ExtendAppCompatActivity
 import cn.jiliapp.library.helper.DimenHelper
+import cn.jiliapp.woodenfish.R
 import cn.jiliapp.woodenfish.databinding.ActivityHomeWorkBinding
+import cn.jiliapp.woodenfish.model.MeritsDTO
+import cn.jiliapp.woodenfish.viewmodel.HomeWorkViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 
 /**
  * 做功课,得功德
@@ -45,22 +50,28 @@ class HomeWorkActivity : ExtendAppCompatActivity() {
         this.setAudioAttributes(attrBuilder.build())
     }.build();
 
+    private  val homeWorkViewModel: HomeWorkViewModel by viewModels()
+
+    private val batchId: Long=1111L;
+
+    private var knockTimer: Timer? = null;
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityHomeWorkBinding.inflate(layoutInflater);
+        val binding = ActivityHomeWorkBinding.inflate(layoutInflater)
         setContentView(binding.root);
-        toggleFullScreen();
-        initSetting(binding);
-        initOnClick(binding);
+        toggleFullScreen()
+        initSetting(binding)
+        initViewModel(binding)
+        initOnClick(binding)
     }
 
     /**
      * 初始化设置 从本地加载功德值
      */
     private fun initSetting(binding:ActivityHomeWorkBinding){
-        binding.myMerits.setText("111")
+        //binding.myMerits.text = "0"
 
         //木槌
         binding.mallet.setPivotX(DimenHelper.dp2px(this, 81.8f) as Float)
@@ -89,28 +100,82 @@ class HomeWorkActivity : ExtendAppCompatActivity() {
      * 初始化事件
      */
     private fun initOnClick(binding:ActivityHomeWorkBinding){
-        // On the click of startBtn
-        binding.root.setOnClickListener {
-            malletAnimator.start();
-            meritsPlusOneAnimatorSet.cancel();
-            meritsPlusOneAnimatorSet.start();
-            playWoodenFishKnockVoice(R.raw.knock_wooden_fish)
-            //Caches.addGongde(this);
-            //this.myGongde.setText(String.valueOf(Caches.getGongde(this)));
-            // woodenFish();
+        //功德佛
+       /* binding.temple.setOnClickListener {
+          startActivityResult(TempleActivity::class.java,templeActivityResultLauncher)
+        }*/
+
+        //更换法器
+        binding.instrument.setOnClickListener {
+            startActivityResult(WoodenFishActivity::class.java,templeActivityResultLauncher)
         }
 
-
-        binding.temple.setOnClickListener {
-            startActivityResult(TempleActivity::class.java,templeActivityResultLauncher)
+        //自动模式
+        binding.autoKnock.setOnCheckedChangeListener { _, isChecked ->
+            autoKnockKnock(isChecked)
         }
 
-
-
+        //敲击木鱼
         binding.woodenFish.setOnClickListener {
-
-            startActivityResult(WoodenFishActivity::class.java,woodenFishActivityResultLauncher)
+            if (isAutoKnocking()){
+                Toast.makeText(this,"自动累计功德中...",Toast.LENGTH_SHORT).show()
+                return@setOnClickListener;
+            }
+            knockKnock();
         }
+
+        binding.root.setOnClickListener {
+            if (isAutoKnocking()){
+                Toast.makeText(this,"自动累计功德中...",Toast.LENGTH_SHORT).show()
+                return@setOnClickListener;
+            }
+            knockKnock();
+        }
+
+    }
+
+
+    private fun autoKnockKnock(isChecked: Boolean){
+        if (isChecked) {
+            if (knockTimer!=null){
+                knockTimer?.cancel()
+                knockTimer = null
+            }
+            knockTimer= Timer()
+            knockTimer?.schedule(object : TimerTask() {
+                override fun run() {
+                    runOnUiThread {
+                        knockKnock()
+                    }
+                }
+            }, 0, 618)
+        } else {
+            //取消自动任务
+            knockTimer?.cancel()
+            knockTimer = null
+        }
+    }
+
+    private fun  knockKnock(){
+        malletAnimator.start();
+        meritsPlusOneAnimatorSet.cancel();
+        meritsPlusOneAnimatorSet.start();
+        playWoodenFishKnockVoice(R.raw.knock_wooden_fish)
+        //Caches.addGongde(this);
+        //this.myGongde.setText(String.valueOf(Caches.getGongde(this)));
+        // woodenFish();
+        homeWorkViewModel.knockMerits(MeritsDTO(1,batchId))
+    }
+
+
+    private fun isAutoKnocking():Boolean{
+        return knockTimer!==null;
+    }
+
+    private fun initViewModel(binding:ActivityHomeWorkBinding){
+        homeWorkViewModel.knockMeritsList.observe(this, Observer{
+            binding.myMerits.text = it.size.toString()
+        })
     }
 
     /**
