@@ -1,6 +1,8 @@
 package cn.jiliapp.woodenfish.viewmodel
 
 import android.app.Application
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
@@ -20,12 +22,18 @@ class HomeWorkViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) : BaseViewModel(application) {
 
+
+
+
     private var _knockMeritsList: MutableLiveData<List<MeritsDTO>> = MutableLiveData(listOf())
     val  knockMeritsList: LiveData<List<MeritsDTO>> =_knockMeritsList
 
     fun  knockMerits(meritsDTO: MeritsDTO)  {
         _knockMeritsList.value = _knockMeritsList.value?.plus(meritsDTO) ?: listOf(meritsDTO)
     }
+
+
+
 
 
 }

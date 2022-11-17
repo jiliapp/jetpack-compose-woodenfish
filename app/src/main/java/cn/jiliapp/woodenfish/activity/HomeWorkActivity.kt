@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
+import android.content.Context
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.SoundPool
@@ -12,19 +13,32 @@ import android.util.SparseArray
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.Observer
 import cn.jiliapp.library.activity.ExtendAppCompatActivity
 import cn.jiliapp.library.helper.DimenHelper
 import cn.jiliapp.woodenfish.R
 import cn.jiliapp.woodenfish.databinding.ActivityHomeWorkBinding
 import cn.jiliapp.woodenfish.model.MeritsDTO
+import cn.jiliapp.woodenfish.viewmodel.DataStoreViewModel
 import cn.jiliapp.woodenfish.viewmodel.HomeWorkViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.scopes.ActivityScoped
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.util.*
 
 /**
  * 做功课,得功德
  */
+
+
+
 @AndroidEntryPoint
 class HomeWorkActivity : ExtendAppCompatActivity() {
 
@@ -51,11 +65,16 @@ class HomeWorkActivity : ExtendAppCompatActivity() {
     }.build();
 
     private  val homeWorkViewModel: HomeWorkViewModel by viewModels()
+    private  val dataStoreViewModel: DataStoreViewModel by viewModels()
 
     private val batchId: Long=1111L;
 
     private var knockTimer: Timer? = null;
 
+    //功德存储
+
+    //private val dataStore: DataStore<Preferences> =createDataStore
+    //private val MERITS = intPreferencesKey("merits")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,11 +86,32 @@ class HomeWorkActivity : ExtendAppCompatActivity() {
         initOnClick(binding)
     }
 
+    override fun onStart() {
+        super.onStart()
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+    }
+
     /**
      * 初始化设置 从本地加载功德值
      */
     private fun initSetting(binding:ActivityHomeWorkBinding){
-        //binding.myMerits.text = "0"
+        //功德值
+  /*      val meritsFlow: Flow<Int> = dataStore.data
+            .map { preferences ->
+                // No type safety.
+                preferences[MERITS] ?: 0
+            }
+        binding.myMerits.text = meritsFlow.toString()*/
+
+        MainScope().launch {
+            binding.myMerits.text= dataStoreViewModel.merits.firstOrNull()?.knock.toString()
+        }
+
 
         //木槌
         binding.mallet.setPivotX(DimenHelper.dp2px(this, 81.8f) as Float)
@@ -101,9 +141,10 @@ class HomeWorkActivity : ExtendAppCompatActivity() {
      */
     private fun initOnClick(binding:ActivityHomeWorkBinding){
         //功德佛
-       /* binding.temple.setOnClickListener {
-          startActivityResult(TempleActivity::class.java,templeActivityResultLauncher)
-        }*/
+        binding.temple.setOnClickListener {
+          //startActivityResult(TempleActivity::class.java,templeActivityResultLauncher)
+            homeWorkViewModel.knockMeritsList.value?.size?.let { saveMerits(it) }
+        }
 
         //更换法器
         binding.instrument.setOnClickListener {
@@ -207,6 +248,14 @@ class HomeWorkActivity : ExtendAppCompatActivity() {
         //第六个参数 rate为播放的速率，范围0.5-2.0(0.5为一半速率，1.0为正常速率，2.0为两倍速率)
         soundPool.play(knockWoodenFishVoiceIds.get(voiceResId), 1f, 1f, 1, 0, 1f)
     }
+
+
+     private fun saveMerits(increment:Int) {
+        dataStoreViewModel.saveMerits(MeritsDTO(increment,1L))
+     }
+
+
+
 
 
 }

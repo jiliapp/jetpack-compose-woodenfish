@@ -13,6 +13,7 @@ class MeritsDTO (var knock:Int,var batchId:Long) {
 
     var total:Int =0;
     var time:Date= Date();
+
     private lateinit var sign:String;
     init {
 

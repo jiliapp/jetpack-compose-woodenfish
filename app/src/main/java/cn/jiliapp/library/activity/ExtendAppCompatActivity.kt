@@ -1,6 +1,7 @@
 package cn.jiliapp.library.activity
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.MediaStore
@@ -10,6 +11,10 @@ import android.view.WindowManager
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+import cn.jiliapp.woodenfish.R
 
 open class ExtendAppCompatActivity() : AppCompatActivity() {
 
@@ -44,6 +49,7 @@ open class ExtendAppCompatActivity() : AppCompatActivity() {
             )
         }
     }
+
 
 
 

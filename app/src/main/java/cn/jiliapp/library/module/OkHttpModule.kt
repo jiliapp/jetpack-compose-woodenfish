@@ -14,6 +14,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -21,6 +22,7 @@ object OkHttpModule {
 
     @AuthInterceptorOkHttpClient
     @Provides
+    @Singleton
     fun provideAuthInterceptorOkHttpClient(
           gson: Gson): OkHttpClient {
         return OkHttpClient.Builder()
@@ -35,6 +37,7 @@ object OkHttpModule {
 
     @NoAuthInterceptorOkHttpClient
     @Provides
+    @Singleton
     fun provideNoAuthInterceptorOkHttpClient(
     ): OkHttpClient {
         return OkHttpClient.Builder()
