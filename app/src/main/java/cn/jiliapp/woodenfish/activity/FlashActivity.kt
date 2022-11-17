@@ -17,8 +17,11 @@ class FlashActivity : ExtendAppCompatActivity() {
         val binding = ActivityFlashBinding.inflate(layoutInflater);
         setContentView(binding.root);
         toggleFullScreen();
-        binding.root.setOnClickListener {
+
+
+        binding.woodenFish.setOnClickListener {
            startActivity(HomeWorkActivity::class.java)
         }
+
     }
 }

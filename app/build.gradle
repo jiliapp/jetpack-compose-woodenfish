@@ -56,12 +56,6 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
-
-    //解决冲突Duplicate class androidx.lifecycle.ViewModelLazy found in module
-    //def lifecycle_version = "2.5.0"
-    //implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
-    //implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
-
     //hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-android-compiler:$hilt_version"

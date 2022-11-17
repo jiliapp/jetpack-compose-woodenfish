@@ -42,6 +42,7 @@
         android:paddingBottom="6.0dip"
         android:focusable="true"
         android:clickable="true"
+        android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="换成现金捐献\n更换法器\n发愿(燃烧功德值-筹集功德)\n功德池(交易功德\)\n证书\n我的功德簿"
