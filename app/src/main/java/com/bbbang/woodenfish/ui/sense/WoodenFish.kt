@@ -98,7 +98,7 @@ fun WoodenFishScreen(){
         snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(text = "电子木鱼", modifier =
+                title = { Text(text = stringResource(id = R.string.app_name), modifier =
                 Modifier
                     .fillMaxWidth()
                     .wrapContentSize(Alignment.Center))
@@ -120,11 +120,11 @@ fun WoodenFish(resId:Int,snackBarHostState :SnackbarHostState ,modifier: Modifie
     val autoMeritState = remember { mutableStateOf(false) }
     val meritState = remember { mutableStateOf(0) }
 
-    var visibleState by remember { mutableStateOf(false) }
+    var meritPlus1VisibleState by remember { mutableStateOf(false) }
 
-    val rotationAngle by animateFloatAsState(
-        targetValue = if (!visibleState) 15f else 0f,
-        animationSpec = tween(durationMillis = 313),label = "木槌动画"
+    val malletRotationAngle by animateFloatAsState(
+        targetValue = if (!meritPlus1VisibleState) 15f else 0f,
+        animationSpec = tween(durationMillis = 313),label = stringResource(id = R.string.mallet_label)
     )
 
     val scope = rememberCoroutineScope()
@@ -166,8 +166,8 @@ fun WoodenFish(resId:Int,snackBarHostState :SnackbarHostState ,modifier: Modifie
                 autoMeritState.value=it
             },
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor =  Color(205, 175, 0), // 切换开启时的拇指颜色
-                    checkedTrackColor = Color(245, 215, 0), // 切换开启时的轨道颜色
+                    checkedThumbColor =  Color(255, 235, 0),//Color(205, 175,0), // 切换开启时的拇指颜色
+                    checkedTrackColor = Color.LightGray,//Color(245, 215, 0), // 切换开启时的轨道颜色
                     uncheckedThumbColor = Color.Gray, // 切换关闭时的拇指颜色
                     uncheckedTrackColor = Color.LightGray // 切换关闭时的轨道颜色
                 ),
@@ -177,7 +177,7 @@ fun WoodenFish(resId:Int,snackBarHostState :SnackbarHostState ,modifier: Modifie
                 },
             )
 
-            Text(text = "自动敲木鱼",
+            Text(text = stringResource(id = R.string.auto_wooden_fish_label),
                 color=Color.White,
                 modifier=Modifier.constrainAs(autoLabel){
                 start.linkTo(switch.end,8.dp)
@@ -199,29 +199,35 @@ fun WoodenFish(resId:Int,snackBarHostState :SnackbarHostState ,modifier: Modifie
                         end.linkTo(parent.end)
                     })
 
-
+            val autoKnockMeritTips=stringResource(id = R.string.auto_knock_merit_tips)
             Image(painter = painterResource(id = R.drawable.wooden_fish)
                 ,contentDescription =null
                 ,modifier = Modifier
                     .safeDrawingPadding()
                     .clickable {
-                        if (autoMeritState.value){
+                        if (autoMeritState.value) {
                             scope.launch {
-                               when (snackBarHostState.showSnackbar("自动加功德中...","确认",false, SnackbarDuration.Short)) {
+                                when (snackBarHostState.showSnackbar(
+                                    autoKnockMeritTips,
+                                    null,
+                                    false,
+                                    SnackbarDuration.Short
+                                )) {
                                     SnackbarResult.ActionPerformed -> {
                                         /* Handle snackbar action performed */
                                     }
+
                                     SnackbarResult.Dismissed -> {
                                         /* Handle snackbar dismissed */
                                     }
                                 }
 
                             }
-                           return@clickable
+                            return@clickable
                         }
                         soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f)
                         meritState.value++
-                        visibleState = true
+                        meritPlus1VisibleState = true
                     }
                     .constrainAs(woodenFish) {
                         start.linkTo(parent.start)
@@ -239,29 +245,28 @@ fun WoodenFish(resId:Int,snackBarHostState :SnackbarHostState ,modifier: Modifie
                         top.linkTo(woodenFish.top, (-16).dp)
                         end.linkTo(woodenFish.end, (-16).dp)
                     }
-                    //https://developer.android.com/jetpack/compose/graphics/draw/modifiers?hl=zh-cn
                     .graphicsLayer {
                         //TransformOrigin.Center TransformOrigin(0f, 0f)
                         this.transformOrigin = TransformOrigin(0.7f, 0.7f)
-                        this.rotationZ = rotationAngle
+                        this.rotationZ = malletRotationAngle
                     }
             )
 
 
             AnimatedVisibility(
-                visible=visibleState,
+                visible=meritPlus1VisibleState,
                 exit = fadeOut(),
                 enter = fadeIn()+ slideInVertically { fullHeight->fullHeight },
                 modifier = Modifier
                     .fillMaxWidth()
                     .constrainAs(meritPlus1) {
-                        bottom.linkTo(mallet.top,16.dp)
+                        bottom.linkTo(mallet.top, 16.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
             ) {
                 Text(
-                    text = "功德+1",
+                    text = stringResource(id = R.string.merit_plus1),
                     fontSize = 14.sp,
                     color = Color.White,
                     modifier = Modifier
@@ -285,9 +290,11 @@ fun WoodenFish(resId:Int,snackBarHostState :SnackbarHostState ,modifier: Modifie
             )
 
             LaunchedEffect(meritState.value){
-                if (visibleState) {
-                    delay(313)
-                    visibleState = false
+                scope.launch {
+                    if (meritPlus1VisibleState) {
+                        delay(120)
+                        meritPlus1VisibleState = false
+                    }
                 }
                 if (meritState.value<=0){
                     //读取数据
@@ -316,8 +323,8 @@ fun WoodenFish(resId:Int,snackBarHostState :SnackbarHostState ,modifier: Modifie
                     while (true) {
                         soundPool.play(soundId, 1.0f, 1.0f, 1, 0, 1.0f)
                         meritState.value++
-                        visibleState=true
-                        delay(1000)
+                        meritPlus1VisibleState=true
+                        delay(618)
                     }
                 }
 
